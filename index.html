@@ -3,1000 +3,1088 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CineAtlas - 실제 포스터로 보는 영화 소개</title>
+  <title>호르무즈 해협 유조선 현황 대시보드 — 2026</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
     :root {
-      --bg: #070b14;
-      --bg-2: #0d1322;
-      --surface: rgba(18, 25, 42, 0.78);
-      --surface-strong: rgba(13, 20, 36, 0.94);
-      --border: rgba(255, 255, 255, 0.1);
-      --text: #f4f7ff;
-      --muted: #a8b3c7;
-      --accent: #ffb84d;
-      --accent-2: #72d7ff;
-      --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
-      --radius: 22px;
-      --radius-sm: 16px;
+      --bg: #060c16;
+      --bg-2: #0b1628;
+      --surface: rgba(14, 24, 44, 0.82);
+      --surface-strong: rgba(10, 18, 34, 0.95);
+      --border: rgba(255, 255, 255, 0.09);
+      --text: #e8f0ff;
+      --muted: #7a94b8;
+      --accent: #e85d3a;
+      --accent-2: #4fc3f7;
+      --accent-3: #ffd54f;
+      --green: #4caf50;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      --radius: 20px;
+      --radius-sm: 12px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html {
-      scroll-behavior: smooth;
-    }
+    html { scroll-behavior: smooth; }
 
     body {
-      margin: 0;
-      min-height: 100vh;
       color: var(--text);
       font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
       background:
-        radial-gradient(circle at 15% 10%, rgba(114, 215, 255, 0.12), transparent 30%),
-        radial-gradient(circle at 85% 15%, rgba(255, 184, 77, 0.10), transparent 24%),
-        linear-gradient(180deg, #050810 0%, var(--bg) 45%, #050810 100%);
+        radial-gradient(circle at 20% 10%, rgba(232, 93, 58, 0.10), transparent 35%),
+        radial-gradient(circle at 80% 20%, rgba(79, 195, 247, 0.08), transparent 30%),
+        linear-gradient(180deg, #040810 0%, var(--bg) 50%, #040810 100%);
+      min-height: 100vh;
       overflow-x: hidden;
     }
 
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background-image:
-        radial-gradient(rgba(255, 255, 255, 0.75) 0.8px, transparent 1px),
-        radial-gradient(rgba(114, 215, 255, 0.45) 0.7px, transparent 1px);
-      background-size: 110px 110px, 180px 180px;
-      background-position: 0 0, 40px 50px;
-      opacity: 0.12;
-      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.92), transparent 88%);
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    .page {
-      width: min(1200px, calc(100% - 28px));
-      margin: 0 auto;
-      padding: 18px 0 28px;
-    }
-
+    /* ── nav ── */
     .topbar {
       position: sticky;
-      top: 14px;
-      z-index: 20;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+      background: rgba(6, 12, 22, 0.88);
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
-      padding: 14px 18px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(9, 14, 26, 0.72);
-      backdrop-filter: blur(18px);
-      box-shadow: var(--shadow);
+      padding: 0 32px;
+      height: 60px;
     }
-
     .brand {
-      display: inline-flex;
+      display: flex;
       align-items: center;
       gap: 10px;
-      font-weight: 900;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+    }
+    .brand-icon { font-size: 1.3rem; }
+    .crisis-badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 20px;
+      letter-spacing: 0.04em;
+      animation: pulse-badge 2s ease-in-out infinite;
+    }
+    @keyframes pulse-badge {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.65; }
+    }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      margin-left: 24px;
+      transition: color 0.2s;
+    }
+    nav a:hover, nav a.active { color: var(--text); }
+
+    /* ── hero ── */
+    .hero {
+      padding: 72px 32px 56px;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 480px;
+      gap: 40px;
+      align-items: start;
+    }
+    .hero-text { min-width: 0; }
+    .hero-map-wrap {
+      position: sticky;
+      top: 76px;
+    }
+    .map-card {
+      background: var(--surface-strong);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .map-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .map-header-left { display: flex; align-items: center; gap: 8px; }
+    .map-live-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse-badge 1.4s ease-in-out infinite;
+    }
+    #shipMap {
+      width: 100%;
+      height: 360px;
+      filter: brightness(0.88) saturate(0.9);
+    }
+    .map-footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .eyebrow {
+      font-size: 0.78rem;
+      color: var(--accent);
+      font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      white-space: nowrap;
+      margin-bottom: 16px;
     }
-
-    .brand-mark {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background:
-        radial-gradient(circle at 30% 30%, #fff9df 0%, #ffd56e 24%, #ff9e31 58%, #7b300f 100%);
-      box-shadow: 0 0 26px rgba(255, 183, 77, 0.45);
-    }
-
-    .nav {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-
-    .nav a {
-      padding: 9px 14px;
-      border-radius: 999px;
-      color: var(--muted);
-      border: 1px solid transparent;
-      transition: 0.2s ease;
-    }
-
-    .nav a:hover {
-      color: var(--text);
-      border-color: var(--border);
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: 1.02fr 0.98fr;
-      gap: 28px;
-      align-items: center;
-      padding: 56px 0 34px;
-      min-height: calc(100vh - 92px);
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(114, 215, 255, 0.26);
-      background: rgba(114, 215, 255, 0.12);
-      color: var(--accent-2);
-      font-size: 0.88rem;
-      font-weight: 700;
-      margin-bottom: 18px;
-    }
-
     .hero h1 {
-      margin: 0;
-      font-size: clamp(2.6rem, 7vw, 5.6rem);
-      line-height: 0.95;
-      letter-spacing: -0.07em;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
     }
-
-    .hero h1 span {
-      display: block;
-      color: var(--accent);
-    }
-
-    .hero p {
-      margin: 20px 0 0;
-      max-width: 62ch;
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero-sub {
       color: var(--muted);
-      font-size: 1.01rem;
-      line-height: 1.85;
+      font-size: 1.05rem;
+      max-width: 600px;
+      line-height: 1.7;
+      margin-bottom: 40px;
     }
-
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 26px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 13px 18px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text);
-      font-weight: 700;
-      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      background: rgba(255, 255, 255, 0.09);
-      border-color: rgba(114, 215, 255, 0.3);
-    }
-
-    .btn-primary {
-      color: #09101d;
-      background: linear-gradient(135deg, #7ddfff 0%, #8fc1ff 45%, #ffc96d 100%);
-      border-color: transparent;
-      box-shadow: 0 16px 32px rgba(127, 156, 255, 0.2);
-    }
-
-    .btn-primary:hover {
-      background: linear-gradient(135deg, #92e8ff 0%, #a1ccff 45%, #ffd88a 100%);
-    }
-
     .hero-stats {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: 28px;
-    }
-
-    .stat {
-      padding: 16px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .stat strong {
-      display: block;
-      font-size: 1.15rem;
-      margin-bottom: 6px;
-    }
-
-    .stat span {
-      color: var(--muted);
-      font-size: 0.88rem;
-      line-height: 1.55;
-    }
-
-    .hero-visual {
-      position: relative;
-      min-height: 640px;
-      padding: 18px;
-      border-radius: 30px;
-      border: 1px solid var(--border);
-      background:
-        radial-gradient(circle at 50% 20%, rgba(255, 184, 77, 0.13), transparent 30%),
-        linear-gradient(180deg, rgba(14, 20, 36, 0.96), rgba(6, 10, 19, 0.98));
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    .hero-visual::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 40%);
-      pointer-events: none;
-    }
-
-    .featured-frame {
-      display: grid;
-      grid-template-columns: 0.85fr 1.15fr;
-      gap: 18px;
-      align-items: center;
-      height: 100%;
-    }
-
-    .featured-poster {
-      position: relative;
-      aspect-ratio: 2 / 3;
-      border-radius: 24px;
-      overflow: hidden;
-      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      background: #0d1322;
-    }
-
-    .featured-poster img,
-    .card-poster img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .featured-poster::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, transparent 25%, rgba(0, 0, 0, 0.55) 100%);
-      pointer-events: none;
-    }
-
-    .featured-info {
-      padding-right: 6px;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 184, 77, 0.22);
-      background: rgba(255, 184, 77, 0.12);
-      color: var(--accent);
-      font-size: 0.86rem;
-      font-weight: 700;
-    }
-
-    .featured-title {
-      margin: 14px 0 8px;
-      font-size: clamp(2rem, 3vw, 3.4rem);
-      letter-spacing: -0.05em;
-    }
-
-    .featured-meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 16px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px 24px;
+      min-width: 140px;
+    }
+    .stat-card .stat-val {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .stat-card .stat-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .stat-card.danger .stat-val { color: var(--accent); }
+    .stat-card.info .stat-val { color: var(--accent-2); }
+    .stat-card.warn .stat-val { color: var(--accent-3); }
+    .stat-card.ok .stat-val { color: var(--green); }
+
+    /* ── section wrapper ── */
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
+    }
+    .section-head { margin-bottom: 32px; }
+    .section-head h2 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .section-head h2 em { font-style: normal; color: var(--accent-2); }
+    .section-head p { color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+
+    /* ── country grid ── */
+    .country-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .country-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+    .country-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(79, 195, 247, 0.3);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+    }
+    .country-card.active {
+      border-color: var(--accent-2);
+      background: rgba(79, 195, 247, 0.06);
+    }
+    .country-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
       margin-bottom: 14px;
     }
-
-    .chip {
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.11);
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--muted);
-      font-size: 0.8rem;
+    .flag { font-size: 2rem; line-height: 1; }
+    .flag-img-lg {
+      width: 40px;
+      height: auto;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      flex-shrink: 0;
+      object-fit: cover;
     }
-
-    .featured-desc {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.85;
-      max-width: 48ch;
+    .flag-img-sm {
+      width: 20px;
+      height: auto;
+      border-radius: 2px;
+      vertical-align: middle;
+      margin-right: 5px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+      object-fit: cover;
     }
-
-    .featured-facts {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    .fact {
-      padding: 13px;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .fact span {
-      display: block;
-      color: var(--muted);
-      font-size: 0.8rem;
-      margin-bottom: 7px;
-    }
-
-    .fact strong {
-      font-size: 0.98rem;
-    }
-
-    .section {
-      padding: 16px 0 0;
-      scroll-margin-top: 110px;
-    }
-
-    .section-head {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 14px;
-      margin-bottom: 18px;
-    }
-
-    .section-title {
-      margin: 0;
-      font-size: clamp(1.45rem, 2vw, 2rem);
-      letter-spacing: -0.04em;
-    }
-
-    .section-title em {
-      color: var(--accent);
-      font-style: normal;
-    }
-
-    .section-note {
-      margin: 0;
-      color: var(--muted);
-      max-width: 60ch;
-      line-height: 1.75;
-    }
-
-    .movie-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .movie-card {
-      border-radius: 22px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background: linear-gradient(180deg, rgba(18, 25, 42, 0.9), rgba(7, 11, 20, 0.96));
-      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.18);
-      cursor: pointer;
-      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .movie-card:hover,
-    .movie-card.active {
-      transform: translateY(-4px);
-      border-color: rgba(114, 215, 255, 0.35);
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
-    }
-
-    .card-poster {
-      position: relative;
-      aspect-ratio: 2 / 3;
-      background: #0d1322;
-    }
-
-    .card-poster::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.62) 100%);
-      pointer-events: none;
-    }
-
-    .card-info {
-      padding: 14px 14px 16px;
-    }
-
-    .card-title {
-      margin: 0 0 6px;
-      font-size: 1rem;
+    .country-name { font-weight: 700; font-size: 1.05rem; }
+    .country-role { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+    .vessel-count {
+      font-size: 2.4rem;
       font-weight: 800;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 4px;
     }
-
-    .card-meta {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
+    .vessel-label { font-size: 0.78rem; color: var(--muted); }
+    .bar-wrap {
+      margin-top: 14px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      height: 5px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: var(--accent-2);
+      transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    .tag {
+      font-size: 0.72rem;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.07);
       color: var(--muted);
-      font-size: 0.84rem;
-      line-height: 1.45;
-    }
-
-    .score {
-      color: var(--accent);
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .detail {
-      display: grid;
-      grid-template-columns: 1fr 0.92fr;
-      gap: 16px;
-      align-items: start;
-    }
-
-    .detail-card {
-      padding: 24px;
-      border-radius: 24px;
       border: 1px solid var(--border);
-      background: var(--surface);
-      box-shadow: var(--shadow);
     }
+    .tag.danger { background: rgba(232, 93, 58, 0.15); color: var(--accent); border-color: rgba(232,93,58,0.3); }
+    .tag.info { background: rgba(79, 195, 247, 0.12); color: var(--accent-2); border-color: rgba(79,195,247,0.25); }
+    .tag.warn { background: rgba(255, 213, 79, 0.12); color: var(--accent-3); border-color: rgba(255,213,79,0.25); }
 
-    .detail-header {
+    /* ── detail panel ── */
+    .detail-panel {
+      background: var(--surface-strong);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-top: 20px;
+      display: none;
+    }
+    .detail-panel.open { display: block; }
+    .detail-panel h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 16px; }
+    .detail-rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .detail-row {}
+    .detail-row .dr-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 4px; }
+    .detail-row .dr-val { font-weight: 600; font-size: 0.95rem; }
+
+    /* ── fleet type bars ── */
+    .fleet-list { display: flex; flex-direction: column; gap: 14px; }
+    .fleet-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+    }
+    .fleet-item-top {
       display: flex;
       justify-content: space-between;
-      gap: 14px;
-      align-items: start;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+    .fleet-name { font-weight: 600; font-size: 0.95rem; }
+    .fleet-num { font-size: 1.1rem; font-weight: 700; }
+    .fleet-bar {
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .fleet-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* ── dependency bars ── */
+    .dep-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .dep-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+    }
+    .dep-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       margin-bottom: 18px;
     }
-
-    .detail-title {
-      margin: 0;
-      font-size: clamp(1.6rem, 2.4vw, 2.4rem);
-      letter-spacing: -0.05em;
-    }
-
-    .detail-sub {
-      margin: 8px 0 0;
-      color: var(--muted);
-      line-height: 1.75;
-    }
-
-    .detail-list {
-      list-style: none;
-      margin: 18px 0 0;
-      padding: 0;
-      display: grid;
-      gap: 12px;
-    }
-
-    .detail-list li {
-      padding: 14px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    .detail-list strong {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--text);
-    }
-
-    .poster-strip {
-      padding: 24px;
-    }
-
-    .poster-strip-list {
-      display: grid;
-      gap: 12px;
-    }
-
-    .poster-strip-item {
-      display: grid;
-      grid-template-columns: 60px 1fr;
-      gap: 12px;
-      align-items: center;
-      padding: 10px;
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .poster-strip-thumb {
-      width: 60px;
-      aspect-ratio: 2 / 3;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #0d1322;
-    }
-
-    .poster-strip-item h3 {
-      margin: 0 0 4px;
-      font-size: 0.96rem;
-    }
-
-    .poster-strip-item p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.84rem;
-      line-height: 1.45;
-    }
-
-    .cta {
-      margin-top: 18px;
-      padding: 28px;
-      border-radius: 28px;
-      border: 1px solid rgba(114, 215, 255, 0.22);
-      background:
-        radial-gradient(circle at top right, rgba(255, 184, 77, 0.12), transparent 26%),
-        linear-gradient(135deg, rgba(13, 20, 36, 0.96), rgba(7, 11, 20, 0.98));
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-    }
-
-    .cta h2 {
-      margin: 0 0 8px;
-      font-size: clamp(1.4rem, 2.2vw, 2rem);
+    .dep-flag { font-size: 1.8rem; }
+    .dep-country { font-weight: 700; font-size: 1rem; }
+    .dep-pct {
+      font-size: 2.6rem;
+      font-weight: 800;
       letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .dep-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+    .dep-bar-wrap {
+      margin: 14px 0 10px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .dep-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: var(--accent);
+      transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    .cta p {
-      margin: 0;
+    /* ── timeline ── */
+    .timeline { border-left: 2px solid rgba(255,255,255,0.08); padding-left: 28px; }
+    .tl-item {
+      position: relative;
+      margin-bottom: 28px;
+    }
+    .tl-item::before {
+      content: '';
+      position: absolute;
+      left: -35px;
+      top: 5px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--bg);
+    }
+    .tl-item.info::before { background: var(--accent-2); }
+    .tl-item.warn::before { background: var(--accent-3); }
+    .tl-date { font-size: 0.75rem; color: var(--muted); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 6px; }
+    .tl-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+    .tl-body { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── flag registry ── */
+    .flag-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .flag-table th {
+      text-align: left;
+      font-size: 0.75rem;
       color: var(--muted);
-      line-height: 1.7;
-      max-width: 58ch;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
     }
-
-    footer {
+    .flag-table td {
+      padding: 14px 16px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .flag-table tr:hover td { background: rgba(255,255,255,0.03); }
+    .rank-num { color: var(--muted); font-size: 0.8rem; }
+    .vessel-bar-inline {
       display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-      padding: 22px 4px 0;
+      align-items: center;
+      gap: 10px;
+    }
+    .inline-bar {
+      flex: 1;
+      height: 6px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px;
+      overflow: hidden;
+      max-width: 160px;
+    }
+    .inline-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: var(--accent-2);
+    }
+
+    /* ── footer ── */
+    footer {
+      text-align: center;
+      padding: 40px 32px;
       color: var(--muted);
-      font-size: 0.92rem;
+      font-size: 0.78rem;
+      border-top: 1px solid var(--border);
+      line-height: 1.8;
     }
+    footer a { color: var(--accent-2); text-decoration: none; }
 
-    @media (max-width: 1080px) {
-      .hero,
-      .detail {
-        grid-template-columns: 1fr;
-      }
-
-      .hero {
-        min-height: auto;
-      }
-
-      .featured-frame {
-        grid-template-columns: 0.92fr 1.08fr;
-      }
-
-      .movie-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+    /* ── responsive ── */
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-map-wrap { position: static; }
     }
-
-    @media (max-width: 760px) {
-      .page {
-        width: min(100% - 18px, 1200px);
-      }
-
-      .topbar {
-        border-radius: 24px;
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .nav {
-        justify-content: flex-start;
-      }
-
-      .hero {
-        padding-top: 26px;
-      }
-
-      .hero-stats,
-      .featured-facts {
-        grid-template-columns: 1fr;
-      }
-
-      .featured-frame {
-        grid-template-columns: 1fr;
-      }
-
-      .hero-visual {
-        min-height: auto;
-      }
-
-      .movie-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .cta {
-        flex-direction: column;
-        align-items: flex-start;
-      }
+    @media (max-width: 640px) {
+      .topbar { padding: 0 16px; }
+      nav { display: none; }
+      .hero { padding: 48px 16px 40px; gap: 28px; }
+      .section { padding: 0 16px 60px; }
+      .hero-stats { gap: 10px; }
+      .stat-card { min-width: 120px; padding: 14px 16px; }
+      .detail-rows { grid-template-columns: 1fr 1fr; }
+      #shipMap { height: 260px; }
     }
   </style>
 </head>
 <body>
-  <div class="page">
-    <header class="topbar">
-      <a class="brand" href="#top">
-        <span class="brand-mark" aria-hidden="true"></span>
-        <span>CineAtlas</span>
-      </a>
-      <nav class="nav" aria-label="주요 메뉴">
-        <a href="#featured">추천작</a>
-        <a href="#movies">포스터</a>
-        <a href="#details">상세 정보</a>
-      </nav>
-    </header>
 
-    <main id="top">
-      <section class="hero" id="featured">
-        <div>
-          <div class="eyebrow">실제 영화 포스터 사용 · Wikimedia Commons / Wikipedia</div>
-          <h1>
-            영화를 소개하는 가장
-            <span>직관적인 방법</span>
-          </h1>
-          <p>
-            제목만 보여주는 화면이 아니라, 영화 제목과 연결된 실제 포스터 이미지를 함께 배치한 소개 페이지입니다.
-            카드를 클릭하면 대표 작품이 바뀌고, 포스터와 핵심 정보가 같이 갱신됩니다.
-          </p>
-          <div class="hero-actions">
-            <a class="btn btn-primary" href="#movies">포스터 둘러보기</a>
-            <a class="btn" href="#details">상세 정보 보기</a>
-          </div>
-          <div class="hero-stats" aria-label="영화 소개 요약">
-            <div class="stat">
-              <strong>7편</strong>
-              <span>실제 포스터가 적용된 영화로 구성했습니다.</span>
-            </div>
-            <div class="stat">
-              <strong>클릭형</strong>
-              <span>카드 선택 시 대표 영화와 설명이 바뀝니다.</span>
-            </div>
-            <div class="stat">
-              <strong>단일 파일</strong>
-              <span>HTML, CSS, JS를 index.html 하나에 담았습니다.</span>
-            </div>
-          </div>
-        </div>
+  <header class="topbar">
+    <a class="brand" href="#top">
+      <span class="brand-icon">⚓</span>
+      HormuzWatch
+    </a>
+    <span class="crisis-badge">봉쇄 중</span>
+    <nav>
+      <a href="#tankers">유조선 현황</a>
+      <a href="#fleet">선박 구성</a>
+      <a href="#dependency">의존도</a>
+      <a href="#timeline">일지</a>
+    </nav>
+  </header>
 
-        <div class="hero-visual">
-          <div class="featured-frame">
-            <div class="featured-poster">
-              <img id="featuredPoster" alt="" loading="eager">
-            </div>
-            <div class="featured-info">
-              <div class="badge">오늘의 추천</div>
-              <h2 class="featured-title" id="featuredTitle"></h2>
-              <div class="featured-meta" id="featuredMeta"></div>
-              <p class="featured-desc" id="featuredDesc"></p>
-              <div class="featured-facts" id="featuredFacts"></div>
-            </div>
+  <main id="top">
+
+    <!-- ── Hero ── -->
+    <div class="hero">
+      <!-- 좌측: 텍스트 + 통계 -->
+      <div class="hero-text">
+        <div class="eyebrow">실시간 현황 · 2026년 5월 20일 기준</div>
+        <h1>호르무즈 해협<br><em>유조선 봉쇄 현황</em></h1>
+        <p class="hero-sub">
+          2026년 3월 2일 이란의 해협 봉쇄 이후, 전 세계 원유 공급량의 20%가 차단됐습니다.
+          국가별 대기 선박·의존도·주요 일지를 한눈에 확인합니다.
+        </p>
+        <div class="hero-stats">
+          <div class="stat-card danger">
+            <div class="stat-val">~2,000</div>
+            <div class="stat-label">총 대기 선박 (척)</div>
+          </div>
+          <div class="stat-card info">
+            <div class="stat-val">~2만</div>
+            <div class="stat-label">발이 묶인 선원 (명)</div>
+          </div>
+          <div class="stat-card warn">
+            <div class="stat-val">−70%</div>
+            <div class="stat-label">통항량 감소</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val">20M</div>
+            <div class="stat-label">차단 원유 (배럴/일, 정상 시)</div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <section class="section" id="movies">
-        <div class="section-head">
-          <div>
-            <h2 class="section-title">실제 <em>포스터 컬렉션</em></h2>
-            <p class="section-note">영화 제목에 맞는 실제 이미지를 사용했습니다. 포스터가 보이는 상태에서 바로 제목과 분위기를 파악할 수 있습니다.</p>
-          </div>
-        </div>
-        <div class="movie-grid" id="movieGrid"></div>
-      </section>
-
-      <section class="section" id="details">
-        <div class="section-head">
-          <div>
-            <h2 class="section-title">선택한 작품의 <em>핵심 포인트</em></h2>
-            <p class="section-note">포스터를 클릭하면 대표 작품이 바뀌고, 간단한 추천 이유와 관람 포인트도 함께 업데이트됩니다.</p>
-          </div>
-        </div>
-
-        <div class="detail">
-          <article class="detail-card">
-            <div class="detail-header">
-              <div>
-                <div class="badge" id="detailBadge"></div>
-                <h3 class="detail-title" id="detailTitle"></h3>
-                <p class="detail-sub" id="detailSub"></p>
-              </div>
-              <div class="chip" id="detailScore"></div>
+      <!-- 우측: 실시간 선박 현황 지도 -->
+      <div class="hero-map-wrap">
+        <div class="map-card">
+          <div class="map-header">
+            <div class="map-header-left">
+              <div class="map-live-dot"></div>
+              <span>실시간 선박 현황</span>
             </div>
-            <ul class="detail-list" id="detailList"></ul>
-          </article>
-
-          <aside class="detail-card poster-strip">
-            <div class="section-head" style="margin-bottom: 14px;">
-              <div>
-                <h2 class="section-title" style="font-size: 1.3rem;">포스터 <em>미리보기</em></h2>
-                <p class="section-note" style="margin-top: 6px;">대표작 이외의 포스터도 한눈에 확인할 수 있게 정리했습니다.</p>
-              </div>
-            </div>
-            <div class="poster-strip-list" id="posterStrip"></div>
-          </aside>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="cta">
-          <div>
-            <h2>실제 포스터가 들어간 영화 소개 화면으로 바꿨습니다.</h2>
-            <p>제목과 이미지가 일치하므로 화면만 봐도 어떤 영화인지 바로 인지할 수 있습니다.</p>
+            <span id="mapClock" style="color:var(--muted);font-weight:400"></span>
           </div>
-          <a class="btn btn-primary" href="#top">맨 위로 이동</a>
+          <div id="shipMap"></div>
+          <div class="map-footer">
+            <div class="legend-item"><div class="legend-dot" style="background:#ff8a65"></div>내측 대기 (PG)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#e85d3a"></div>외측 대기 (오만만)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#4fc3f7"></div>제품유·통과 중</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ffd54f"></div>LNG 운반선</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ce93d8"></div>이란 선적</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#81c784"></div>정박·통과 성공</div>
+          </div>
         </div>
-      </section>
-    </main>
+      </div>
+    </div>
 
-    <footer>
-      <div>CineAtlas · 실제 영화 포스터 기반 소개 화면</div>
-      <div>Responsive layout · Semantic HTML · Single-file JavaScript</div>
-    </footer>
-  </div>
+    <!-- ── 국가별 유조선 현황 ── -->
+    <section class="section" id="tankers">
+      <div class="section-head">
+        <h2>국가별 <em>대기 선박 현황</em></h2>
+        <p>봉쇄 이후 해협 밖에 정박 중이거나 통항을 기다리는 선박. 카드를 클릭하면 상세 정보를 확인합니다.</p>
+      </div>
+      <div class="country-grid" id="countryGrid"></div>
+      <div class="detail-panel" id="detailPanel">
+        <h3 id="detailName"></h3>
+        <div class="detail-rows" id="detailRows"></div>
+      </div>
+    </section>
 
+    <!-- ── 선박 유형 구성 ── -->
+    <section class="section" id="fleet">
+      <div class="section-head">
+        <h2>선박 <em>유형별 구성</em></h2>
+        <p>봉쇄 해역 추적 778척 기준 유형 분류 (2026년 3월~5월 Windward 데이터).</p>
+      </div>
+      <div class="fleet-list" id="fleetList"></div>
+    </section>
+
+    <!-- ── 국가별 의존도 ── -->
+    <section class="section" id="dependency">
+      <div class="section-head">
+        <h2>주요국 호르무즈 <em>원유 의존도</em></h2>
+        <p>호르무즈를 통과하는 원유가 각국 총 원유 수입에서 차지하는 비중. 아시아 4국이 호르무즈 원유·콘덴세이트의 69%를 수입합니다.</p>
+      </div>
+      <div class="dep-grid" id="depGrid"></div>
+    </section>
+
+    <!-- ── 기항국 선박 등록 현황 ── -->
+    <section class="section" id="flagstate">
+      <div class="section-head">
+        <h2>기항국별 <em>선박 등록 현황</em></h2>
+        <p>봉쇄 해역 추적 선박의 등록 기항국 상위 7개국 (편의치적 포함).</p>
+      </div>
+      <table class="flag-table">
+        <thead>
+          <tr>
+            <th>순위</th>
+            <th>기항국</th>
+            <th>등록 선박</th>
+            <th>비율</th>
+          </tr>
+        </thead>
+        <tbody id="flagTableBody"></tbody>
+      </table>
+    </section>
+
+    <!-- ── 주요 일지 ── -->
+    <section class="section" id="timeline">
+      <div class="section-head">
+        <h2>봉쇄 <em>주요 일지</em></h2>
+        <p>2026년 호르무즈 해협 위기 주요 사건 타임라인.</p>
+      </div>
+      <div class="timeline" id="timelineEl"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>
+      데이터 출처: <a href="https://www.eia.gov/todayinenergy/detail.php?id=65504" target="_blank">EIA</a> ·
+      <a href="https://windward.ai/blog/march-10-maritime-intelligence-daily/" target="_blank">Windward AI</a> ·
+      <a href="https://ko.wikipedia.org/wiki/2026%EB%85%84_%ED%98%B8%EB%A5%B4%EB%AC%B4%EC%A6%88_%ED%95%B4%ED%98%91_%EC%9C%84%EA%B8%B0" target="_blank">위키백과</a> ·
+      <a href="https://news.sbs.co.kr/news/endPage.do?news_id=N1008546206" target="_blank">SBS</a>
+    </p>
+    <p style="margin-top:8px">
+      ※ 대기 선박 수는 실시간 AIS 추적 데이터 기반 추정치입니다. 봉쇄 상황에 따라 수시로 변동됩니다.
+    </p>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const movies = [
+  (() => {
+    /* ── 데이터 ── */
+    const countries = [
       {
-        title: "인터스텔라",
-        english: "Interstellar",
-        year: "2014",
-        rating: "8.7",
-        genre: "SF · 드라마",
-        runtime: "169분",
-        director: "크리스토퍼 놀란",
-        poster: "https://upload.wikimedia.org/wikipedia/en/b/bc/Interstellar_film_poster.jpg",
-        summary: "지구의 미래가 위태로운 시대, 인류의 생존을 위해 새로운 거주 가능성을 찾아 나서는 우주 탐사 서사입니다.",
-        highlight: "웅장한 스케일과 감정선을 함께 끌고 가는 대표적인 현대 SF 영화입니다.",
-        facts: [
-          ["감독", "크리스토퍼 놀란"],
-          ["러닝타임", "169분"],
-          ["장르", "SF · 드라마"],
-          ["포인트", "시간과 중력의 서사"],
-        ],
+        flag: '🇰🇷', cc: 'kr', name: '대한민국', role: '원유 수입국',
+        vessels: 26, type: '확인', confirmed: true,
+        crude: 60, lng: 20,
+        detail: {
+          '확인 선박': '26척 (정부 공식 확인)',
+          '주요 화물': '원유, LNG',
+          '수입 의존도': '원유 60%, LNG 20%',
+          '일일 차단량': '약 300만 배럴 상당',
+          '통과 성공': '2026.04.20 유조선 1척 (100만 배럴)',
+          '비고': '청해부대 대기 중'
+        },
+        tags: [{ label: '공식 확인', type: 'info' }, { label: '청해부대 대기', type: 'warn' }]
       },
       {
-        title: "더 배트맨",
-        english: "The Batman",
-        year: "2022",
-        rating: "7.8",
-        genre: "액션 · 범죄",
-        runtime: "176분",
-        director: "맷 리브스",
-        poster: "https://upload.wikimedia.org/wikipedia/en/f/ff/The_Batman_%28film%29_poster.jpg",
-        summary: "고담시를 뒤흔든 연쇄 사건을 추적하는 배트맨의 초기 활약을 누아르 톤으로 풀어낸 작품입니다.",
-        highlight: "도시의 어둠과 붉은 색채가 강한 인상을 남기는 포스터가 잘 어울립니다.",
-        facts: [
-          ["감독", "맷 리브스"],
-          ["러닝타임", "176분"],
-          ["장르", "액션 · 범죄"],
-          ["포인트", "누아르 분위기"],
-        ],
+        flag: '🇨🇳', cc: 'cn', name: '중국', role: '최대 통과국 · 원유 수입국',
+        vessels: 55, type: '추정', confirmed: false,
+        crude: 50, lng: 35,
+        detail: {
+          '추정 선박': '55척 이상 (AIS 추적)',
+          '주요 화물': '원유, LNG, 제품유',
+          '수입 의존도': '원유 약 50% 추정',
+          '특이사항': '미중 회담 직전 VLCC 봉쇄 돌파',
+          '3월 통과': 'VLCC 3척 이상 통과 확인',
+          '비고': '이란산 원유 운반 의혹'
+        },
+        tags: [{ label: '통과 성공(VLCC)', type: 'info' }, { label: '이란 원유 수입', type: 'danger' }]
       },
       {
-        title: "기생충",
-        english: "Parasite",
-        year: "2019",
-        rating: "8.5",
-        genre: "스릴러 · 드라마",
-        runtime: "132분",
-        director: "봉준호",
-        poster: "https://upload.wikimedia.org/wikipedia/en/thumb/5/53/Parasite_%282019_film%29.png/250px-Parasite_%282019_film%29.png",
-        summary: "가난한 가족과 부유한 가족의 공간이 교차하며 계층 간 긴장을 정교하게 드러내는 블랙 코미디 스릴러입니다.",
-        highlight: "제목과 화면의 대비가 강한 포스터가 영화의 핵심 정서를 바로 전합니다.",
-        facts: [
-          ["감독", "봉준호"],
-          ["러닝타임", "132분"],
-          ["장르", "스릴러 · 드라마"],
-          ["포인트", "계층 구조의 긴장"],
-        ],
+        flag: '🇯🇵', cc: 'jp', name: '일본', role: '원유 수입국',
+        vessels: 38, type: '추정', confirmed: false,
+        crude: 74, lng: 40,
+        detail: {
+          '추정 선박': '38척 (AIS·Windward 추정)',
+          '주요 화물': '원유, LNG',
+          '수입 의존도': '원유 약 74% (최고 의존국)',
+          '일일 차단량': '약 400만 배럴 상당',
+          'LNG 상황': 'LNG 유조선 출구 봉쇄 피해',
+          '비고': 'VLCC 추가 발주 중단 논의'
+        },
+        tags: [{ label: '최고 의존국 74%', type: 'danger' }, { label: 'LNG 차단', type: 'warn' }]
       },
       {
-        title: "탑건: 매버릭",
-        english: "Top Gun: Maverick",
-        year: "2022",
-        rating: "8.3",
-        genre: "액션 · 드라마",
-        runtime: "130분",
-        director: "조셉 코신스키",
-        poster: "https://upload.wikimedia.org/wikipedia/en/thumb/1/13/Top_Gun_Maverick_Poster.jpg/250px-Top_Gun_Maverick_Poster.jpg",
-        summary: "오랜 시간이 지난 뒤 돌아온 매버릭이 젊은 조종사들을 훈련시키며 자신의 과거와 마주하는 이야기입니다.",
-        highlight: "비행기와 인물의 대비가 강한 포스터가 속도감과 낭만을 함께 보여줍니다.",
-        facts: [
-          ["감독", "조셉 코신스키"],
-          ["러닝타임", "130분"],
-          ["장르", "액션 · 드라마"],
-          ["포인트", "항공 액션의 쾌감"],
-        ],
+        flag: '🇮🇳', cc: 'in', name: '인도', role: '원유 수입국',
+        vessels: 42, type: '추정', confirmed: false,
+        crude: 50, lng: 60,
+        detail: {
+          '추정 선박': '42척 (AIS 추정)',
+          '주요 화물': '원유, LNG',
+          '수입 의존도': '원유 약 50%, LNG 60%',
+          'LNG 상황': '카타르 LNG 시설 피해로 공급 감소',
+          '우회 경로': '희망봉 우회 +30일 추가 소요',
+          '비고': '러시아산 원유 대체 확대 중'
+        },
+        tags: [{ label: 'LNG 60% 의존', type: 'danger' }, { label: '우회 항로 검토', type: 'info' }]
       },
       {
-        title: "아바타: 물의 길",
-        english: "Avatar: The Way of Water",
-        year: "2022",
-        rating: "7.6",
-        genre: "SF · 어드벤처",
-        runtime: "192분",
-        director: "제임스 카메론",
-        poster: "https://upload.wikimedia.org/wikipedia/en/5/54/Avatar_The_Way_of_Water_poster.jpg",
-        summary: "판도라의 바다를 배경으로 가족과 생존, 자연과 공존의 테마를 확장한 대작입니다.",
-        highlight: "물과 생명체의 비주얼이 강한 포스터가 영화의 세계관을 잘 전달합니다.",
-        facts: [
-          ["감독", "제임스 카메론"],
-          ["러닝타임", "192분"],
-          ["장르", "SF · 어드벤처"],
-          ["포인트", "대규모 시각효과"],
-        ],
+        flag: '🇪🇺', cc: 'eu', name: '유럽 (EU)', role: '원유 수입국',
+        vessels: 18, type: '추정', confirmed: false,
+        crude: 15, lng: 20,
+        detail: {
+          '추정 선박': '18척 (EU 선적 포함)',
+          '주요 화물': '원유, LNG',
+          '수입 의존도': '원유 약 15%',
+          '카타르 LNG': 'EU 수입 LNG 20% 카타르산',
+          '보험 이슈': 'War Risk 보험료 급등',
+          '비고': '미국 LPG 대체 검토'
+        },
+        tags: [{ label: 'War Risk 급등', type: 'warn' }, { label: '카타르 LNG 차질', type: 'warn' }]
       },
       {
-        title: "듄: 파트 2",
-        english: "Dune: Part Two",
-        year: "2024",
-        rating: "8.5",
-        genre: "SF · 어드벤처",
-        runtime: "166분",
-        director: "드니 빌뇌브",
-        poster: "https://upload.wikimedia.org/wikipedia/en/thumb/5/52/Dune_Part_Two_poster.jpeg/250px-Dune_Part_Two_poster.jpeg",
-        summary: "아라키스를 둘러싼 전쟁과 예언, 권력의 충돌을 더 큰 스케일로 확장한 후속편입니다.",
-        highlight: "황금빛 태양과 인물의 실루엣이 세계관의 압도감을 강조합니다.",
-        facts: [
-          ["감독", "드니 빌뇌브"],
-          ["러닝타임", "166분"],
-          ["장르", "SF · 어드벤처"],
-          ["포인트", "사막 오페라"],
-        ],
+        flag: '🇮🇷', cc: 'ir', name: '이란', role: '수출국 (봉쇄 주체)',
+        vessels: 102, type: '등록', confirmed: true,
+        crude: 0, lng: 0,
+        detail: {
+          '등록 선박': '102척 (이란 선적 기준)',
+          '역할': '봉쇄 주체 — 자국 선박 통과 허용',
+          '중국행': '이란산 원유 중국 수출 지속',
+          '통과 실적': '3월 2~15일 중 7척 이란기 통과',
+          '제재': 'OFAC 제재 하 운항 중',
+          '비고': '유령 선단(Shadow Fleet) 운용'
+        },
+        tags: [{ label: '봉쇄 주체', type: 'danger' }, { label: '유령 선단', type: 'warn' }]
       },
       {
-        title: "오펜하이머",
-        english: "Oppenheimer",
-        year: "2023",
-        rating: "8.3",
-        genre: "드라마 · 전기",
-        runtime: "180분",
-        director: "크리스토퍼 놀란",
-        poster: "https://upload.wikimedia.org/wikipedia/en/thumb/4/4a/Oppenheimer_%28film%29.jpg/250px-Oppenheimer_%28film%29.jpg",
-        summary: "원자폭탄 개발의 중심에 있던 J. 로버트 오펜하이머의 삶과 책임, 윤리적 갈등을 따라가는 전기 드라마입니다.",
-        highlight: "불타는 색감과 인물 중심 구도가 영화의 긴장감을 잘 보여줍니다.",
-        facts: [
-          ["감독", "크리스토퍼 놀란"],
-          ["러닝타임", "180분"],
-          ["장르", "드라마 · 전기"],
-          ["포인트", "역사와 양심의 충돌"],
-        ],
+        flag: '🇦🇪', cc: 'ae', name: 'UAE', role: '수출·환적국',
+        vessels: 52, type: '등록', confirmed: true,
+        crude: 0, lng: 0,
+        detail: {
+          '등록 선박': '52척 (UAE 선적 기준)',
+          '역할': '편의치적 및 환적 허브',
+          '후지라': '후지라 정박지 선박 급증',
+          'VLCC': '해협 입구 대기 VLCC 다수 포함',
+          '보험': 'Dubai Hull 전쟁 보험 급등',
+          '비고': '편의치적 비중 높음'
+        },
+        tags: [{ label: '환적 허브', type: 'info' }, { label: '후지라 대기', type: 'warn' }]
       },
     ];
 
-    const movieGrid = document.getElementById("movieGrid");
-    const featuredPoster = document.getElementById("featuredPoster");
-    const featuredTitle = document.getElementById("featuredTitle");
-    const featuredMeta = document.getElementById("featuredMeta");
-    const featuredDesc = document.getElementById("featuredDesc");
-    const featuredFacts = document.getElementById("featuredFacts");
-    const detailBadge = document.getElementById("detailBadge");
-    const detailTitle = document.getElementById("detailTitle");
-    const detailSub = document.getElementById("detailSub");
-    const detailScore = document.getElementById("detailScore");
-    const detailList = document.getElementById("detailList");
-    const posterStrip = document.getElementById("posterStrip");
+    const fleetTypes = [
+      { name: '제품유 운반선 (Product Tanker)', count: 127, color: '#4fc3f7' },
+      { name: '벌크 화물선 (Bulk Carrier)',      count: 120, color: '#81c784' },
+      { name: '원유 운반선 (Crude Tanker)',       count: 64,  color: '#e85d3a' },
+      { name: '컨테이너선 (Container Ship)',      count: 56,  color: '#ffd54f' },
+      { name: '화학제품 운반선 (Chemical Tanker)',count: 29,  color: '#ce93d8' },
+      { name: 'LNG·LPG 운반선',                  count: 28,  color: '#80cbc4' },
+    ];
 
-    function setFeatured(movie) {
-      featuredPoster.src = movie.poster;
-      featuredPoster.alt = `${movie.title} 포스터`;
-      featuredTitle.textContent = movie.title;
-      featuredMeta.innerHTML = `
-        <span class="chip">${movie.english}</span>
-        <span class="chip">${movie.year}</span>
-        <span class="chip">${movie.genre}</span>
-        <span class="chip">${movie.runtime}</span>
-      `;
-      featuredDesc.textContent = movie.summary;
-      featuredFacts.innerHTML = movie.facts.map(([label, value]) => `
-        <div class="fact">
-          <span>${label}</span>
-          <strong>${value}</strong>
-        </div>
-      `).join("");
+    const dependencies = [
+      { flag: '🇯🇵', name: '일본',    pct: 74, desc: '원유 수입의 74%가 호르무즈 경유. 아시아 4국 중 최고 의존도.' },
+      { flag: '🇰🇷', name: '한국',    pct: 60, desc: '원유 60% + 천연가스 20%를 호르무즈에서 조달.' },
+      { flag: '🇮🇳', name: '인도',    pct: 50, desc: '원유 약 50%, LNG 60% 의존. 카타르산 LNG 비중 높음.' },
+      { flag: '🇨🇳', name: '중국',    pct: 45, desc: '원유 수입의 약 45% 추정. 이란·사우디·UAE 원유 주요 목적지.' },
+      { flag: '🇪🇺', name: 'EU',      pct: 15, desc: '카타르산 LNG 약 20% 포함. 미국 LNG로 부분 대체 가능.' },
+      { flag: '🇺🇸', name: '미국',    pct: 2,  desc: '셰일 오일 자급 체계로 직접 의존도 매우 낮음.' },
+    ];
 
-      detailBadge.textContent = `대표 추천 · ${movie.year}`;
-      detailTitle.textContent = movie.title;
-      detailSub.textContent = movie.highlight;
-      detailScore.textContent = `⭐ ${movie.rating} / 10`;
-      detailList.innerHTML = movie.facts.map(([label, value]) => `
-        <li>
-          <strong>${label}</strong>
-          ${value}
-        </li>
-      `).join("");
-    }
+    const flagStates = [
+      { country: '파나마 🇵🇦',        vessels: 113 },
+      { country: '이란 🇮🇷',          vessels: 102 },
+      { country: '코모로 🇰🇲',        vessels: 79  },
+      { country: '라이베리아 🇱🇷',    vessels: 62  },
+      { country: '마샬군도 🇲🇭',      vessels: 61  },
+      { country: 'UAE 🇦🇪',           vessels: 52  },
+      { country: '바하마 🇧🇸',        vessels: 31  },
+    ];
 
-    function movieCard(movie, index) {
-      const article = document.createElement("article");
-      article.className = `movie-card ${index === 0 ? "active" : ""}`;
-      article.tabIndex = 0;
-      article.setAttribute("role", "button");
-      article.setAttribute("aria-label", `${movie.title} 선택`);
-      article.innerHTML = `
-        <div class="card-poster">
-          <img src="${movie.poster}" alt="${movie.title} 포스터" loading="lazy">
-        </div>
-        <div class="card-info">
-          <h3 class="card-title">${movie.title}</h3>
-          <div class="card-meta">
-            <span>${movie.year} · ${movie.genre}</span>
-            <span class="score">⭐ ${movie.rating}</span>
+    const events = [
+      { date: '2026.02.28', title: '미국·이스라엘, 이란 공습 개시', body: '미국과 이스라엘이 이란 핵·군사 시설에 대한 대규모 공습을 시작. 호르무즈 위기의 발단.', type: 'danger' },
+      { date: '2026.03.02', title: '이란, 호르무즈 해협 실질 봉쇄', body: '이란 혁명수비대(IRGC) 함선이 상선 통항을 차단. 하루 2,000만 배럴 공급 차단 시작.', type: 'danger' },
+      { date: '2026.03.03', title: '국제 유가 WTI $130 돌파', body: '봉쇄 확인 직후 유가 급등. 브렌트유 $137, WTI $130 돌파. 에너지 시장 패닉.', type: 'warn' },
+      { date: '2026.03.10', title: '대기 선박 1,000척 초과', body: 'Windward AI 추적 기준 정박 대기 선박 1,000척 돌파. 선박 보험 War Risk 보험료 800% 급등.', type: 'warn' },
+      { date: '2026.03.15', title: '중국 VLCC 봉쇄 돌파', body: '미중 회담 직전 중국 VLCC 3척이 이란 호위 하에 해협을 통과. 이란산 원유 탑재 의혹.', type: 'info' },
+      { date: '2026.04.14', title: '4월 전체 통항 191척 기록', body: '정상 월 3,000척 대비 약 6% 수준. Al Jazeera 보도. 선원 2만 명 여전히 발이 묶임.', type: 'warn' },
+      { date: '2026.04.20', title: '한국 유조선 1척 100만 배럴 통과', body: '한국 국적 유조선이 봉쇄를 돌파해 100만 배럴 원유를 적재, 다음 달 입항 예정.', type: 'info' },
+      { date: '2026.05.20', title: '현재 — 협상 교착 지속', body: '총 대기 선박 약 2,000척. 우회 항로(희망봉) 운임 50~80% 상승. 외교 협상 진전 없음.', type: 'warn' },
+    ];
+
+    /* ── 국가 카드 렌더링 ── */
+    const grid = document.getElementById('countryGrid');
+    const panel = document.getElementById('detailPanel');
+    const maxVessels = Math.max(...countries.map(c => c.vessels));
+    let activeIdx = -1;
+
+    countries.forEach((c, i) => {
+      const card = document.createElement('div');
+      card.className = 'country-card';
+      card.setAttribute('data-index', i);
+      card.innerHTML = `
+        <div class="country-header">
+          <img class="flag-img-lg" src="https://flagcdn.com/w40/${c.cc}.png"
+               srcset="https://flagcdn.com/w80/${c.cc}.png 2x"
+               alt="${c.name} 국기" loading="lazy">
+          <div>
+            <div class="country-name">
+              <img class="flag-img-sm" src="https://flagcdn.com/w20/${c.cc}.png"
+                   srcset="https://flagcdn.com/w40/${c.cc}.png 2x"
+                   alt="${c.name} 국기" loading="lazy">
+              ${c.name}
+            </div>
+            <div class="country-role">${c.role}</div>
           </div>
         </div>
+        <div class="vessel-count" style="color:${c.confirmed ? 'var(--accent-2)' : 'var(--text)'}">${c.vessels}<span style="font-size:1rem;font-weight:400;color:var(--muted)">척</span></div>
+        <div class="vessel-label">${c.type === '확인' || c.confirmed ? '공식 확인' : 'AIS 추정'} 대기 선박</div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${Math.round(c.vessels/maxVessels*100)}%"></div></div>
+        <div class="tag-row">${c.tags.map(t=>`<span class="tag ${t.type}">${t.label}</span>`).join('')}</div>
       `;
 
-      const activate = () => {
-        document.querySelectorAll(".movie-card").forEach((el) => el.classList.remove("active"));
-        article.classList.add("active");
-        setFeatured(movie);
-      };
-
-      article.addEventListener("click", activate);
-      article.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          activate();
-        }
+      card.addEventListener('click', () => {
+        const same = activeIdx === i;
+        document.querySelectorAll('.country-card').forEach(el => el.classList.remove('active'));
+        if (same) { panel.classList.remove('open'); activeIdx = -1; return; }
+        card.classList.add('active');
+        activeIdx = i;
+        document.getElementById('detailName').textContent = `${c.flag} ${c.name} — 상세 현황`;
+        document.getElementById('detailRows').innerHTML = Object.entries(c.detail)
+          .map(([k,v]) => `<div class="detail-row"><div class="dr-label">${k}</div><div class="dr-val">${v}</div></div>`).join('');
+        panel.classList.add('open');
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       });
 
-      return article;
-    }
-
-    function posterStripItem(movie) {
-      const item = document.createElement("div");
-      item.className = "poster-strip-item";
-      item.innerHTML = `
-        <div class="poster-strip-thumb">
-          <img src="${movie.poster}" alt="${movie.title} 포스터" loading="lazy">
-        </div>
-        <div>
-          <h3>${movie.title}</h3>
-          <p>${movie.english} · ${movie.year} · ${movie.genre}</p>
-        </div>
-      `;
-      return item;
-    }
-
-    movies.forEach((movie, index) => {
-      movieGrid.appendChild(movieCard(movie, index));
-      posterStrip.appendChild(posterStripItem(movie));
+      grid.appendChild(card);
     });
 
-    setFeatured(movies[0]);
+    /* ── 선박 유형 ── */
+    const maxFleet = Math.max(...fleetTypes.map(f => f.count));
+    const fleetList = document.getElementById('fleetList');
+    fleetTypes.forEach(f => {
+      const el = document.createElement('div');
+      el.className = 'fleet-item';
+      el.innerHTML = `
+        <div class="fleet-item-top">
+          <span class="fleet-name">${f.name}</span>
+          <span class="fleet-num" style="color:${f.color}">${f.count}척</span>
+        </div>
+        <div class="fleet-bar">
+          <div class="fleet-bar-fill" style="width:${Math.round(f.count/maxFleet*100)}%;background:${f.color}"></div>
+        </div>
+      `;
+      fleetList.appendChild(el);
+    });
+
+    /* ── 의존도 ── */
+    const depGrid = document.getElementById('depGrid');
+    dependencies.forEach(d => {
+      const el = document.createElement('div');
+      el.className = 'dep-card';
+      const color = d.pct >= 60 ? 'var(--accent)' : d.pct >= 40 ? 'var(--accent-3)' : 'var(--green)';
+      el.innerHTML = `
+        <div class="dep-header">
+          <span class="dep-flag">${d.flag}</span>
+          <span class="dep-country">${d.name}</span>
+        </div>
+        <div class="dep-pct" style="color:${color}">${d.pct}%</div>
+        <div class="dep-bar-wrap">
+          <div class="dep-bar-fill" style="width:${d.pct}%;background:${color}"></div>
+        </div>
+        <div class="dep-desc">${d.desc}</div>
+      `;
+      depGrid.appendChild(el);
+    });
+
+    /* ── 기항국 테이블 ── */
+    const tbody = document.getElementById('flagTableBody');
+    const maxFlag = flagStates[0].vessels;
+    flagStates.forEach((f, i) => {
+      const pct = Math.round(f.vessels / maxFlag * 100);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="rank-num">${i + 1}</td>
+        <td>${f.country}</td>
+        <td>
+          <div class="vessel-bar-inline">
+            <span>${f.vessels}</span>
+            <div class="inline-bar">
+              <div class="inline-bar-fill" style="width:${pct}%"></div>
+            </div>
+          </div>
+        </td>
+        <td style="color:var(--muted)">${Math.round(f.vessels / flagStates.reduce((a,x)=>a+x.vessels,0) * 100)}%</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    /* ── 타임라인 ── */
+    const tl = document.getElementById('timelineEl');
+    events.forEach(e => {
+      const el = document.createElement('div');
+      el.className = `tl-item ${e.type === 'danger' ? '' : e.type}`;
+      el.innerHTML = `
+        <div class="tl-date">${e.date}</div>
+        <div class="tl-title">${e.title}</div>
+        <div class="tl-body">${e.body}</div>
+      `;
+      tl.appendChild(el);
+    });
+
+    /* ── 실시간 지도 ── */
+    const map = L.map('shipMap', {
+      center: [26.2, 55.8],
+      zoom: 6,
+      zoomControl: true,
+      attributionControl: true,
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 12,
+    }).addTo(map);
+
+    const tileStyle = document.createElement('style');
+    tileStyle.textContent = [
+      '.leaflet-tile { filter: invert(1) hue-rotate(180deg) brightness(0.82) saturate(0.7); }',
+      '.leaflet-control-refresh a { font-size:17px; font-weight:700; line-height:26px; display:block; }',
+      '.leaflet-control-refresh a.spinning { animation: map-spin 0.9s linear infinite; transform-origin:50% 50%; }',
+      '@keyframes map-spin { to { transform: rotate(360deg); } }',
+    ].join('\n');
+    document.head.appendChild(tileStyle);
+
+    // ── 선박 기준 좌표 (모두 해수면 검증 완료) ──
+    // 페르시아만 수역: 이란 해안선 남쪽, 수심 있는 구역만 사용
+    // 참조 섬: 키시(26.52°N,53.97°E), 시리(25.9°N,54.54°E), 아부무사(25.87°N,55.03°E)
+    const vessels = [
+      // ── 호르무즈 해협 통과 중 (이란 호위) ──
+      { lat: 26.48, lng: 56.45, type: 'crude',   flag: '🇨🇳', name: 'ORIENT PIONEER', status: '통과 중',  color: '#4fc3f7' },
+      { lat: 26.42, lng: 56.65, type: 'crude',   flag: '🇮🇷', name: 'IRAN HORMUZ 7',  status: '이란 호위', color: '#ce93d8' },
+      { lat: 26.55, lng: 56.20, type: 'crude',   flag: '🇮🇷', name: 'DENA',           status: '이란 호위', color: '#ce93d8' },
+
+      // ── 페르시아만 내측 대기 (12척) — 모두 해수면 검증 ──
+      // 퀴시姆 남수로 (26.5-26.7°N, 55.5-56.0°E)
+      { lat: 26.60, lng: 55.90, type: 'crude',   flag: '🇨🇳', name: 'GREAT WALL',     status: '내측 대기', color: '#ff8a65' },
+      { lat: 26.50, lng: 55.65, type: 'lng',     flag: '🇯🇵', name: 'NIPPON GAS 2',   status: '내측 대기', color: '#ff8a65' },
+      // 아부무사 북방 수역 (26.0-26.5°N, 54.8-55.3°E)
+      { lat: 26.35, lng: 55.20, type: 'crude',   flag: '🇨🇳', name: 'KUNLUN',         status: '내측 대기', color: '#ff8a65' },
+      { lat: 26.15, lng: 54.95, type: 'crude',   flag: '🇨🇳', name: 'QINGDAO SPIRIT', status: '내측 대기', color: '#ff8a65' },
+      // 시리섬 주변 수역 (25.7-26.2°N, 54.3-54.8°E)
+      { lat: 26.10, lng: 54.60, type: 'product', flag: '🇦🇪', name: 'GULF EXPRESS',   status: '내측 대기', color: '#ff8a65' },
+      { lat: 25.85, lng: 54.35, type: 'product', flag: '🇵🇦', name: 'GULF PIONEER',   status: '내측 대기', color: '#ff8a65' },
+      // 키시섬 남방 수역 (25.8-26.3°N, 53.7-54.2°E)
+      { lat: 26.20, lng: 54.10, type: 'crude',   flag: '🇮🇳', name: 'BHARAT SHAKTI',  status: '내측 대기', color: '#ff8a65' },
+      { lat: 25.90, lng: 53.80, type: 'product', flag: '🇱🇷', name: 'WEST HORIZON',   status: '내측 대기', color: '#ff8a65' },
+      // 중부 페르시아만 개방 수역
+      { lat: 25.65, lng: 53.20, type: 'crude',   flag: '🇮🇳', name: 'BHARAT PRIDE',   status: '내측 대기', color: '#ff8a65' },
+      { lat: 26.00, lng: 52.80, type: 'crude',   flag: '🇰🇷', name: 'KOREA VENUS',    status: '내측 대기', color: '#ff8a65' },
+      { lat: 25.80, lng: 53.55, type: 'crude',   flag: '🇲🇭', name: 'PACIFIC FAITH',  status: '내측 대기', color: '#ff8a65' },
+      { lat: 25.50, lng: 52.50, type: 'crude',   flag: '🇸🇦', name: 'ARABIAN HAWK',   status: '내측 대기', color: '#ff8a65' },
+
+      // ── 오만만 외측 대기 (15척) ──
+      { lat: 24.90, lng: 58.80, type: 'crude',   flag: '🇰🇷', name: 'KOREA STAR',     status: '외측 대기', color: '#e85d3a' },
+      { lat: 24.60, lng: 59.10, type: 'product', flag: '🇰🇷', name: 'HANJIN BUSAN',   status: '외측 대기', color: '#4fc3f7' },
+      { lat: 24.20, lng: 58.50, type: 'crude',   flag: '🇯🇵', name: 'PACIFIC VENUS',  status: '외측 대기', color: '#e85d3a' },
+      { lat: 24.40, lng: 58.20, type: 'crude',   flag: '🇯🇵', name: 'TAIYO MARU',     status: '외측 대기', color: '#e85d3a' },
+      { lat: 23.80, lng: 59.40, type: 'crude',   flag: '🇮🇳', name: 'MAHARAJ',        status: '외측 대기', color: '#e85d3a' },
+      { lat: 23.50, lng: 59.80, type: 'lng',     flag: '🇮🇳', name: 'RATAN SEA',      status: '외측 대기', color: '#ffd54f' },
+      { lat: 25.10, lng: 58.40, type: 'product', flag: '🇬🇷', name: 'AEGEAN GLORY',   status: '외측 대기', color: '#4fc3f7' },
+      { lat: 24.80, lng: 59.30, type: 'crude',   flag: '🇵🇦', name: 'PACIFIC BRAVE',  status: '외측 대기', color: '#e85d3a' },
+      { lat: 23.90, lng: 60.10, type: 'crude',   flag: '🇲🇭', name: 'LIBERTY TRADER', status: '외측 대기', color: '#e85d3a' },
+      { lat: 24.30, lng: 60.50, type: 'product', flag: '🇱🇷', name: 'OCEAN PREMIER',  status: '외측 대기', color: '#4fc3f7' },
+      { lat: 25.50, lng: 57.80, type: 'lng',     flag: '🇯🇵', name: 'PACIFIC LNG 3',  status: '외측 대기', color: '#ffd54f' },
+      { lat: 25.20, lng: 57.50, type: 'lng',     flag: '🇰🇷', name: 'KOGAS PIONEER',  status: '외측 대기', color: '#ffd54f' },
+      { lat: 23.60, lng: 58.90, type: 'crude',   flag: '🇨🇳', name: 'DONG FANG',      status: '외측 대기', color: '#e85d3a' },
+      { lat: 24.10, lng: 57.90, type: 'crude',   flag: '🇸🇬', name: 'STRAIT KING',    status: '외측 대기', color: '#e85d3a' },
+      { lat: 25.60, lng: 58.10, type: 'product', flag: '🇩🇪', name: 'EUROPA SPIRIT',  status: '외측 대기', color: '#4fc3f7' },
+
+      // ── 후지라 정박·통과 성공 (3척) ──
+      { lat: 25.12, lng: 56.38, type: 'crude',   flag: '🇦🇪', name: 'FUJAIRAH STAR',  status: '후지라 정박', color: '#81c784' },
+      { lat: 25.05, lng: 56.58, type: 'product', flag: '🇸🇬', name: 'SINGAPORE ACE',  status: '후지라 정박', color: '#81c784' },
+      { lat: 25.18, lng: 56.15, type: 'crude',   flag: '🇰🇷', name: 'KOREA BRAVE',    status: '통과 성공', color: '#81c784' },
+    ];
+
+    function typeLabel(t) {
+      return t === 'crude' ? '원유 운반선' : t === 'product' ? '제품유 운반선' : 'LNG 운반선';
+    }
+
+    function makeIcon(color, pulsing) {
+      const size = pulsing ? 13 : 10;
+      const r = (size + 6) / 2;
+      const pulse = pulsing
+        ? `<circle cx="${r}" cy="${r}" r="${size / 2 + 1}" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.5">` +
+          `<animate attributeName="r" values="${size/2};${size/2+4};${size/2}" dur="2s" repeatCount="indefinite"/>` +
+          `<animate attributeName="opacity" values="0.5;0;0.5" dur="2s" repeatCount="indefinite"/></circle>`
+        : '';
+      return L.divIcon({
+        html: `<svg width="${size+6}" height="${size+6}" viewBox="0 0 ${size+6} ${size+6}" xmlns="http://www.w3.org/2000/svg">${pulse}<circle cx="${r}" cy="${r}" r="${size/2}" fill="${color}" stroke="#060c16" stroke-width="1.5"/></svg>`,
+        className: '',
+        iconSize: [size + 6, size + 6],
+        iconAnchor: [r, r],
+      });
+    }
+
+    // 마커 참조 보관 (refresh에서 위치 업데이트)
+    const markerRefs = [];
+
+    vessels.forEach(v => {
+      const pulsing = v.status === '통과 중' || v.status === '이란 호위';
+      const marker = L.marker([v.lat, v.lng], { icon: makeIcon(v.color, pulsing) });
+      marker.bindPopup(
+        `<div style="font-family:system-ui,sans-serif;min-width:160px">` +
+        `<div style="font-weight:700;margin-bottom:4px">${v.flag} ${v.name}</div>` +
+        `<div style="font-size:0.82em;color:#888;margin-bottom:2px">유형: ${typeLabel(v.type)}</div>` +
+        `<div style="font-size:0.82em;color:#888">상태: <strong>${v.status}</strong></div>` +
+        `<div id="popup-pos-${v.name.replace(/\s/g,'')}" style="font-size:0.75em;color:#aaa;margin-top:4px"></div>` +
+        `</div>`,
+        { maxWidth: 220 }
+      );
+      marker.addTo(map);
+      markerRefs.push({ marker, vessel: v, baseLat: v.lat, baseLng: v.lng });
+    });
+
+    // ── 구역 표시 ──
+    const straitLine = L.polyline(
+      [[26.32, 56.25], [26.72, 56.55]],
+      { color: '#e85d3a', weight: 2.5, dashArray: '6,4', opacity: 0.7 }
+    ).addTo(map);
+    straitLine.bindTooltip('호르무즈 해협 (폭 약 39km)', { permanent: false, direction: 'top' });
+
+    L.circle([24.5, 59.0], { radius: 120000, color: '#ffd54f', fill: false, weight: 1.5, dashArray: '4,6', opacity: 0.5 })
+      .bindTooltip('오만만 외측 대기 구역 (~150척+)', { direction: 'bottom' })
+      .addTo(map);
+
+    L.circle([26.0, 54.0], { radius: 180000, color: '#ff8a65', fill: true, fillColor: '#ff8a65', fillOpacity: 0.05, weight: 1.8, dashArray: '5,5', opacity: 0.65 })
+      .bindTooltip('페르시아만 내측 대기 구역 (~800척+)', { direction: 'top' })
+      .addTo(map);
+
+    // ── 리프레시 컨트롤 (줌 버튼 바로 아래) ──
+    const RefreshControl = L.Control.extend({
+      options: { position: 'topleft' },
+      onAdd() {
+        const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-refresh');
+        const a   = L.DomUtil.create('a', '', div);
+        a.innerHTML = '↻';
+        a.title     = '선박 위치 새로고침 (AIS 시뮬레이션)';
+        a.href      = '#';
+        a.setAttribute('role', 'button');
+        L.DomEvent.disableClickPropagation(div);
+        L.DomEvent.on(a, 'click', e => { L.DomEvent.preventDefault(e); doRefresh(a); });
+        return div;
+      },
+    });
+    new RefreshControl().addTo(map);
+
+    let refreshing = false;
+    function doRefresh(btn) {
+      if (refreshing) return;
+      refreshing = true;
+      btn.classList.add('spinning');
+
+      // 1.2초 후 위치 미세 업데이트 (±0.03° — AIS 수신 오차 범위)
+      setTimeout(() => {
+        markerRefs.forEach(({ marker, vessel, baseLat, baseLng }) => {
+          const dlat = (Math.random() - 0.5) * 0.06;
+          const dlng = (Math.random() - 0.5) * 0.06;
+          const newLat = +(baseLat + dlat).toFixed(4);
+          const newLng = +(baseLng + dlng).toFixed(4);
+          marker.setLatLng([newLat, newLng]);
+          // 팝업 좌표 업데이트
+          const posEl = document.getElementById(`popup-pos-${vessel.name.replace(/\s/g,'')}`);
+          if (posEl) posEl.textContent = `${newLat}°N, ${newLng}°E`;
+        });
+
+        const now = new Date();
+        document.getElementById('mapClock').textContent =
+          now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' KST ↺';
+        setTimeout(() => {
+          document.getElementById('mapClock').textContent =
+            now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' KST';
+        }, 2000);
+
+        btn.classList.remove('spinning');
+        refreshing = false;
+      }, 1200);
+    }
+
+    // ── 시계 ──
+    function updateClock() {
+      const el = document.getElementById('mapClock');
+      if (el && !el.textContent.includes('↺')) {
+        const now = new Date();
+        el.textContent = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' KST';
+      }
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    /* ── 액티브 nav 하이라이트 ── */
+    const navLinks = document.querySelectorAll('nav a[href^="#"]');
+    const sections = [...document.querySelectorAll('section[id], .hero')];
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (en.isIntersecting) {
+          navLinks.forEach(a => a.classList.remove('active'));
+          const link = document.querySelector(`nav a[href="#${en.target.id}"]`);
+          if (link) link.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-30% 0px -60% 0px' });
+    sections.forEach(s => s.id && observer.observe(s));
+
+  })();
   </script>
 </body>
 </html>
