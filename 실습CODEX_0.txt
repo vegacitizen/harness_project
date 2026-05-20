@@ -1,0 +1,183 @@
+### AGENTS.md
+
+```markdown
+변경 구조:
+
+.
+└── AGENTS.md
+
+`AGENTS.md`에는 Codex가 이 프로젝트에서 항상 따라야 할 기본 작업 원칙만 짧고 명확하게 업데이트하라.
+
+작성 언어:
+- 모든 내용은 한국어로 작성한다.
+- 이후 Codex의 설명, 계획, 보고도 기본적으로 한국어로 하도록 명시한다.
+
+최상단에는 현재 작업 환경 정보를 먼저 기입하라.
+가능하면 안전한 읽기 명령만 사용해서 확인한다.
+
+포함할 환경 정보:
+- 현재 프로젝트 운영체제
+- 현재 shell 또는 terminal 환경
+- 현재 프로젝트 루트 경로
+- 사용 가능한 주요 런타임이 확인되면 함께 기록한다.
+  예: python, node, npm, git
+
+단, 환경 정보를 확인할 수 없으면 추정하지 말고 `UNKNOWN`으로 기록한다.
+
+`AGENTS.md`에 반드시 포함할 작업 원칙:
+
+- 현재 프로젝트 스코프로 작업 범위를 명시하라.
+- 가장 최상위에는 현재 작업 환경 및 운영체제에 대한 정보를 찾아서 기입하라. 
+
+1. 프로젝트 내부 파일을 직접 읽고 판단한다.
+2. 추정으로 구현하지 않는다.
+3. 요구사항이 모호하면 먼저 짧게 확인하거나, 확인이 어려우면 안전한 최소 범위로 작업한다.
+4. 필요한 경우 먼저 짧은 계획을 세운 뒤 작업한다.
+5. 코드 수정 후 관련 테스트 또는 최소 검증을 수행한다.
+6. 테스트를 실행할 수 없으면 그 이유를 명확히 기록한다.
+7. 변경 내용과 검증 결과를 마지막에 짧게 요약한다.
+8. `.env`, secret, credential, API key, 인증 파일은 출력하거나 수정하지 않는다.
+9. 프로젝트 스코프 밖 파일은 읽기/수정하지 않는다.
+10. 삭제, 강제 덮어쓰기, 원격 push 같은 파괴적 작업은 수행하지 않는다.
+11. 사용자가 제공한 변수명, 함수명, 파일명은 임의로 바꾸지 않는다.
+12. 불필요한 대규모 리팩토링을 하지 않는다.
+13. 요청 범위 밖의 기능을 임의로 추가하지 않는다.
+
+완료 후에는 생성한 파일 목록만 짧게 보고하라.
+`AGENTS.md` 전체 내용을 장황하게 반복하지 말고, 핵심 원칙이 반영되었는지만 확인하라.
+```
+
+### config.toml
+
+```markdown
+이 새 프로젝트를 Codex 작업용으로 초기 설정하라.
+
+이번 단계의 목표는 오직 하나다.
+
+- 프로젝트 루트에 `.codex/config.toml`만 생성한다.
+- `AGENTS.md`는 수정하지 않는다.
+
+반드시 생성할 구조:
+
+.
+└── .codex/
+    └── config.toml
+
+`.codex/config.toml`에는 아래 TOML 설정만 정확히 작성하라.
+값을 바꾸지 말고, 다른 설정을 추가하지 마라.
+
+```toml
+model = "gpt-5.4-mini"
+model_reasoning_effort = "medium"
+plan_mode_reasoning_effort = "high"
+sandbox_mode = "workspace-write"
+approval_policy = "on-request"
+
+[agents]
+max_threads = 4
+max_depth = 1
+job_max_runtime_seconds = 1800
+
+단, 각 설정 바로 위에는 TOML 주석(`#`)으로 설명을 붙여라.
+
+각 주석은 반드시 아래 순서로 작성하라.
+
+1. 이 설정이 무엇을 조절하는지 한 문장으로 설명한다.
+2. 현재 값이 어떤 의미인지 설명한다.
+3. 대표적으로 선택 가능한 다른 설정 값은 무엇이 있는지 반드시 포함하라!
+4. 값을 낮추거나 높이면 어떤 효과가 있는지 설명한다.
+
+주석 작성 방식:
+- 기계적인 용어 나열이 아니라, 처음 보는 사람도 이해할 수 있게 직관적으로 작성한다.
+- “다른 값은 더 작은 수나 더 큰 수가 있다”처럼 무의미한 설명을 쓰지 않는다.
+- 가능한 경우 실제 상황 예시를 1개 넣는다.
+- 각 설정당 주석은 3~5줄 이내로 유지한다.
+- 실제 설정값은 절대 바꾸지 않는다. 단, 대표적으로 선택 가능한 다른 설정 값이 주석에 포함되지 않으면 실패다.
+- 주석 때문에 TOML 문법이 깨지면 안 된다.
+```
+
+### rules
+
+```markdown
+이번 단계에서는 Codex shell command 승인 규칙만 설정하라.
+
+원문 docs url: 
+https://developers.openai.com/codex/rules 
+
+목표:
+- 프로젝트 루트에 `.codex/rules/default.rules`만 생성한다.
+- `AGENTS.md`는 수정하지 않는다.
+- `.codex/config.toml`은 수정하지 않는다.
+
+반드시 생성할 구조:
+
+.
+└── .codex/
+    └── rules/
+        └── default.rules
+
+중요:
+- `.rules` 파일은 반드시 Codex rules 문법인 `prefix_rule(...)` 형식으로 작성한다.
+- 자연어 bullet list만 쓰지 마라.
+- 각 rule에는 `pattern`, `decision`, `justification`, `match` 예시를 포함한다.
+- 현재 나의 프로젝트 운영 체제 환경을 확인한 후, 이를 바탕으로 작성하라.
+
+설계 목표:
+- 프로젝트 workspace 내부에서의 코드 읽기, 검색, 파일 생성, 파일 수정, 테스트, 빌드, git 상태 확인은 가능한 한 자동 허용한다.
+- 단, 파일 수정 가능 범위 자체는 `.codex/config.toml`의 `sandbox_mode = "workspace-write"`가 담당한다.
+- `rules/default.rules`는 shell command 승인 여부만 제어한다.
+- 프로젝트 밖 경로 접근, 원격 push, 강제 삭제, secret 출력/수정, 시스템 설정 변경은 차단한다.
+- 범위가 불명확하거나 파괴적인 명령은 자동 허용하지 말고 `prompt` 또는 `forbidden`으로 둔다.
+
+반드시 allow로 작성할 대표 command rule:
+- 읽기/탐색: `ls`, `pwd`, `cat`, `head`, `tail`
+- 검색: `rg`, `grep`, `find`
+- PowerShell 읽기/탐색: `Get-ChildItem`, `Get-Location`, `Get-Content`, `Select-String`
+- git 조회: `git status`, `git diff`, `git log`
+- Python 실행/테스트: `python`, `python -m pytest`, `pytest`
+- Node 실행/테스트/빌드: `npm test`, `npm run lint`, `npm run build`
+- 파일/폴더 생성: `mkdir`, `touch`, `New-Item`
+- 안전한 패치/수정: `apply_patch`, `git apply`, `patch`
+
+반드시 forbidden으로 작성할 대표 command rule:
+- `git push`
+- `rm -rf`
+- `Remove-Item -Recurse -Force`
+- `.env`, secret, credential, API key 파일 출력/수정 시도
+- 프로젝트 밖 절대경로 수정 시도
+- 시스템 설정 변경 명령
+- 디스크/홈/시스템 전체를 대상으로 하는 삭제 또는 권한 변경
+
+권장 prompt rule:
+- `git commit`
+- `git reset`
+- `git clean`
+- `pip install`
+- `npm install`
+- 네트워크 접근 가능성이 있는 명령
+- shell redirection이 포함된 복잡한 명령
+- 실행 범위가 프로젝트 내부인지 확실하지 않은 명령
+
+작성 스타일:
+- rule은 너무 넓게 `bash`, `powershell`, `pwsh` 전체를 allow하지 마라.
+- 가능한 한 실제 실행 명령 prefix 단위로 allow하라.
+- `git push`, 삭제 명령, secret 접근은 allow보다 더 강한 forbidden rule로 반드시 막아라.
+- 여러 rule이 겹칠 경우 `forbidden > prompt > allow`가 되도록 설계하라.
+- shell chain 안에 안전 명령과 위험 명령이 섞여도 위험 명령이 차단되도록 작성하라.
+- 현재 설정 옵션 및 대안 옵션들을 주석으로 설명 포함하라.
+
+검증:
+- 가능하면 `codex execpolicy check`로 대표 명령 몇 개를 검사하라.
+- 검사할 예시:
+  - `pytest -q` → allow
+  - `git status` → allow
+  - `git push origin main` → forbidden
+  - `rm -rf data` → forbidden
+  - `git commit -m test` → prompt
+
+완료 후 보고:
+- 생성한 파일 경로만 짧게 보고하라.
+- 전체 파일 내용을 장황하게 반복하지 마라.
+- allow / prompt / forbidden 규칙이 각각 반영되었는지만 요약하라.
+- 현재 설정 옵션 및 대안 옵션들을 주석으로 설명 포함했습니다. 
+```
