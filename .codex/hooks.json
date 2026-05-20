@@ -1,0 +1,25 @@
+{
+  "PostToolUse": [
+    {
+      "matcher": "apply_patch|Edit|Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash \"/home/jamespark/github/harness_project/.codex/hooks/post-html-validation.sh\"",
+          "timeout": 30
+        }
+      ]
+    }
+  ],
+  "Stop": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash \"/home/jamespark/github/harness_project/.codex/hooks/stop-test-and-commit.sh\"",
+          "timeout": 60
+        }
+      ]
+    }
+  ]
+}
