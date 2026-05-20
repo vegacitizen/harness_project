@@ -47,3 +47,21 @@ max_depth = 1
 # 다른 선택지: 300 (5분, 빠른 실패 감지), 600 (10분), 3600 (1시간, 장시간 작업 허용).
 # 너무 길게 설정하면 무한 루프에 빠진 작업이 오래 방치될 수 있다.
 job_max_runtime_seconds = 1800
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+startup_timeout_sec = 20
+required = false
+
+[mcp_servers.firecrawl]
+command = "powershell.exe"
+args = ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".codex/mcp/firecrawl.ps1"]
+startup_timeout_sec = 20
+required = false
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp@latest"]
+startup_timeout_sec = 20
+required = false
